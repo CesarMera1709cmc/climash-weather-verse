@@ -22,28 +22,81 @@ import {
   MapPin,
   Calendar,
   TrendingUp,
-  AlertTriangle
+  AlertTriangle,
+  Loader2
 } from "lucide-react";
 import WeatherChart from "@/components/WeatherChart";
 import ForecastCard from "@/components/ForecastCard";
 import WeatherMap from "@/components/WeatherMap";
-import { mockWeatherData, mockForecastData, mockAlerts } from "@/lib/mockData";
+import { mockAlerts } from "@/lib/mockData";
 import { formatTemperature, getWeatherIcon } from "@/lib/weatherUtils";
+import { fetchWeatherData, WeatherData, ForecastData } from "@/lib/weatherService";
 
 const Index = () => {
-  const [currentWeather, setCurrentWeather] = useState(mockWeatherData);
-  const [forecast, setForecast] = useState(mockForecastData);
+  const [currentWeather, setCurrentWeather] = useState<WeatherData | null>(null);
+  const [forecast, setForecast] = useState<ForecastData[]>([]);
   const [alerts, setAlerts] = useState(mockAlerts);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCity, setSelectedCity] = useState("Madrid, España");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Coordenadas por defecto (Madrid)
+  const [coordinates, setCoordinates] = useState({ lat: 40.4168, lon: -3.7038 });
+
+  const loadWeatherData = async (lat: number, lon: number) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const { weather, forecast: forecastData } = await fetchWeatherData(lat, lon);
+      setCurrentWeather(weather);
+      setForecast(forecastData);
+    } catch (err) {
+      setError('Error al cargar los datos meteorológicos');
+      console.error('Weather data loading error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadWeatherData(coordinates.lat, coordinates.lon);
+  }, [coordinates]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       setSelectedCity(searchQuery);
-      // Aquí iría la lógica para buscar datos reales del clima
+      // Aquí podrías integrar un servicio de geocodificación
+      // Por ahora, mantener las coordenadas de Madrid
+      loadWeatherData(coordinates.lat, coordinates.lon);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-sky-50 to-cyan-50 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <Loader2 className="h-12 w-12 animate-spin text-blue-500 mx-auto" />
+          <p className="text-xl text-gray-600">Cargando datos meteorológicos...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !currentWeather) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-sky-50 to-cyan-50 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <AlertTriangle className="h-12 w-12 text-red-500 mx-auto" />
+          <p className="text-xl text-gray-600">{error || 'Error al cargar los datos'}</p>
+          <Button onClick={() => loadWeatherData(coordinates.lat, coordinates.lon)}>
+            Reintentar
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   const WeatherIcon = getWeatherIcon(currentWeather.condition);
 
@@ -151,7 +204,8 @@ const Index = () => {
                   'bg-blue-50 border-blue-400'
                 }`}>
                   <div className="flex items-center justify-between mb-2">
-                    <Badge variant={alert.level === 'high' ? 'destructive' : 'secondary'}>
+                    <Badge variant={alert.level === 'high' ? 'destructive' : 
+                      alert.level === 'medium' ? 'secondary' : 'outline'}>
                       {alert.level === 'high' ? 'Alta' : alert.level === 'medium' ? 'Media' : 'Baja'}
                     </Badge>
                     <span className="text-sm text-gray-500">{alert.time}</span>
@@ -185,28 +239,28 @@ const Index = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <WeatherChart 
                 title="Temperatura (24h)"
-                data={mockWeatherData.hourlyTemp}
+                data={currentWeather.hourlyTemp}
                 dataKey="temp"
                 color="#3b82f6"
                 unit="°C"
               />
               <WeatherChart 
                 title="Humedad (24h)"
-                data={mockWeatherData.hourlyHumidity}
+                data={currentWeather.hourlyHumidity}
                 dataKey="humidity"
                 color="#06b6d4"
                 unit="%"
               />
               <WeatherChart 
                 title="Velocidad del Viento (24h)"
-                data={mockWeatherData.hourlyWind}
+                data={currentWeather.hourlyWind}
                 dataKey="speed"
                 color="#10b981"
                 unit="km/h"
               />
               <WeatherChart 
                 title="Presión Atmosférica (24h)"
-                data={mockWeatherData.hourlyPressure}
+                data={currentWeather.hourlyPressure}
                 dataKey="pressure"
                 color="#8b5cf6"
                 unit="hPa"

@@ -3,8 +3,7 @@ import {
   Sun, 
   Cloud, 
   CloudRain, 
-  CloudSnow, 
-  Clou 
+  CloudSnow
 } from "lucide-react";
 
 export const formatTemperature = (temp: number): string => {
@@ -58,4 +57,24 @@ export const getUVLevel = (uvIndex: number): { level: string; color: string } =>
   if (uvIndex >= 6) return { level: "Alto", color: "text-orange-600" };
   if (uvIndex >= 3) return { level: "Moderado", color: "text-yellow-600" };
   return { level: "Bajo", color: "text-green-600" };
+};
+
+// Función para interpretar condiciones meteorológicas basadas en datos de Open-Meteo
+export const getWeatherCondition = (
+  precipitation: number,
+  isDay: boolean,
+  radiation: number
+): string => {
+  if (precipitation > 50) return "lluvioso";
+  if (precipitation > 20) return "parcialmente nublado";
+  if (radiation > 400 && isDay) return "soleado";
+  if (radiation < 100) return "nublado";
+  return isDay ? "despejado" : "despejado nocturno";
+};
+
+// Función para calcular humedad relativa aproximada usando punto de rocío
+export const calculateHumidity = (temp: number, dewPoint: number): number => {
+  const humidity = 100 * Math.exp((17.625 * dewPoint) / (243.04 + dewPoint)) / 
+                   Math.exp((17.625 * temp) / (243.04 + temp));
+  return Math.min(100, Math.max(0, Math.round(humidity)));
 };
