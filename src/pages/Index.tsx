@@ -204,8 +204,7 @@ const Index = () => {
                   'bg-blue-50 border-blue-400'
                 }`}>
                   <div className="flex items-center justify-between mb-2">
-                    <Badge variant={alert.level === 'high' ? 'destructive' : 
-                      alert.level === 'medium' ? 'secondary' : 'outline'}>
+                    <Badge variant={alert.level === 'high' ? 'destructive' : 'secondary'}>
                       {alert.level === 'high' ? 'Alta' : alert.level === 'medium' ? 'Media' : 'Baja'}
                     </Badge>
                     <span className="text-sm text-gray-500">{alert.time}</span>
