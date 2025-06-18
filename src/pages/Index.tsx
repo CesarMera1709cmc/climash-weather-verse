@@ -197,22 +197,46 @@ const Index = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {alerts.map((alert, index) => (
-                <div key={index} className={`p-4 rounded-lg border-l-4 ${
-                  alert.level === 'high' ? 'bg-red-50 border-red-400' :
-                  alert.level === 'medium' ? 'bg-yellow-50 border-yellow-400' :
-                  'bg-blue-50 border-blue-400'
-                }`}>
-                  <div className="flex items-center justify-between mb-2">
-                    <Badge variant={alert.level === 'high' ? 'destructive' : 'secondary'}>
-                      {alert.level === 'high' ? 'Alta' : alert.level === 'medium' ? 'Media' : 'Baja'}
-                    </Badge>
-                    <span className="text-sm text-gray-500">{alert.time}</span>
+              {alerts.map((alert, index) => {
+                const getBadgeVariant = (level: string) => {
+                  switch (level) {
+                    case 'high':
+                      return 'destructive';
+                    case 'medium':
+                      return 'secondary';
+                    default:
+                      return 'outline';
+                  }
+                };
+
+                const getBadgeText = (level: string) => {
+                  switch (level) {
+                    case 'high':
+                      return 'Alta';
+                    case 'medium':
+                      return 'Media';
+                    default:
+                      return 'Baja';
+                  }
+                };
+
+                return (
+                  <div key={index} className={`p-4 rounded-lg border-l-4 ${
+                    alert.level === 'high' ? 'bg-red-50 border-red-400' :
+                    alert.level === 'medium' ? 'bg-yellow-50 border-yellow-400' :
+                    'bg-blue-50 border-blue-400'
+                  }`}>
+                    <div className="flex items-center justify-between mb-2">
+                      <Badge variant={getBadgeVariant(alert.level)}>
+                        {getBadgeText(alert.level)}
+                      </Badge>
+                      <span className="text-sm text-gray-500">{alert.time}</span>
+                    </div>
+                    <h4 className="font-medium text-gray-800">{alert.title}</h4>
+                    <p className="text-sm text-gray-600 mt-1">{alert.description}</p>
                   </div>
-                  <h4 className="font-medium text-gray-800">{alert.title}</h4>
-                  <p className="text-sm text-gray-600 mt-1">{alert.description}</p>
-                </div>
-              ))}
+                );
+              })}
             </CardContent>
           </Card>
         </div>
