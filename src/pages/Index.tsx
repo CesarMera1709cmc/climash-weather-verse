@@ -255,19 +255,12 @@ const Index = () => {
 
         {/* Detailed Weather Data */}
         <Tabs defaultValue="charts" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 bg-white/80 backdrop-blur-sm">
-            <TabsTrigger value="charts" className="flex items-center gap-2">
-              <TrendingUp className="h-4 w-4" />
+          <TabsList className="grid w-full grid-cols-3 bg-white/80 backdrop-blur-sm flex justify-center">
+            <TabsTrigger value="charts" className="">
+              <TrendingUp className="h-4 w-4 " />
               Gráficos
             </TabsTrigger>
-            <TabsTrigger value="forecast" className="flex items-center gap-2">
-              <Calendar className="h-4 w-4" />
-              Pronóstico
-            </TabsTrigger>
-            <TabsTrigger value="map" className="flex items-center gap-2">
-              <Compass className="h-4 w-4" />
-              Mapa
-            </TabsTrigger>
+
           </TabsList>
 
           <TabsContent value="charts" className="space-y-6">
