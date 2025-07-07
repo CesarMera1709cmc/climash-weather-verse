@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -37,12 +36,12 @@ const Index = () => {
   const [forecast, setForecast] = useState<ForecastData[]>([]);
   const [alerts, setAlerts] = useState(mockAlerts);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCity, setSelectedCity] = useState("Madrid, España");
+  const [selectedCity, setSelectedCity] = useState("Berlín, Alemania");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Coordenadas por defecto (Madrid)
-  const [coordinates, setCoordinates] = useState({ lat: 40.4168, lon: -3.7038 });
+  // Coordenadas por defecto (Berlín)
+  const [coordinates, setCoordinates] = useState({ lat: 52.52, lon: 13.41 });
 
   const loadWeatherData = async (lat: number, lon: number) => {
     try {
@@ -63,13 +62,26 @@ const Index = () => {
     loadWeatherData(coordinates.lat, coordinates.lon);
   }, [coordinates]);
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      setSelectedCity(searchQuery);
-      // Aquí podrías integrar un servicio de geocodificación
-      // Por ahora, mantener las coordenadas de Madrid
-      loadWeatherData(coordinates.lat, coordinates.lon);
+      try {
+        // Use Open-Meteo geocoding API or a similar service
+        const geocodingUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(searchQuery)}&count=1&language=es&format=json`;
+        const res = await fetch(geocodingUrl);
+        const data = await res.json();
+        
+        if (data.results && data.results.length > 0) {
+          const { latitude, longitude, name, country } = data.results[0];
+          setSelectedCity(`${name}, ${country}`);
+          setCoordinates({ lat: latitude, lon: longitude });
+        } else {
+          setError('Ciudad no encontrada');
+        }
+      } catch (err) {
+        setError('Error al buscar la ciudad');
+        console.error('Geocoding error:', err);
+      }
     }
   };
 
